@@ -1,0 +1,2 @@
+-- AlterTable
+ALTER TABLE "Post" ALTER COLUMN "published_at" SET DEFAULT CURRENT_TIMESTAMP;

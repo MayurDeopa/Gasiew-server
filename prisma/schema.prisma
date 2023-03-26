@@ -1,0 +1,79 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model UserAssets {
+  user       User   @relation(fields: [id], references: [id],onDelete: Cascade)
+  id         String @id @unique
+  height     Int @default(496)
+  width      Int @default(728)
+  avatar_url String @default("https://ik.imagekit.io/artboomer/pawstagram/imgbin-photography-cat-paris-cat-HvR60Gek0CaHsRM1qMh3vHAwM.jpg?updatedAt=1679255451128")
+}
+
+model User {
+  id                   String      @id @default(uuid())
+  username             String      @unique
+  email                String      @unique
+  password             String
+  role                 String      @default("user")
+  assets               UserAssets?
+  is_public            Boolean     @default(true)
+  is_restricted        Boolean     @default(false)
+  is_profile_completed Boolean     @default(false)
+  post                 Post[]
+  comment              Comment[]
+  likes                Like[]
+  created_at           DateTime    @default(now())
+}
+
+model Post {
+  id           String    @id @default(uuid())
+  user         User      @relation(fields: [user_id], references: [id], onDelete: Cascade)
+  user_id      String
+  created_at    DateTime  @default(now())
+  published_at DateTime   @default(now())
+  is_published Boolean   @default(false)
+  title        String
+  caption      String
+  comments     Comment[]  
+  likes        Like[]
+  assets        PostAssets?
+}
+
+model Comment {
+  id         String   @id @default(uuid())
+  post       Post     @relation(fields: [post_id], references: [id],onDelete: Cascade)
+  user       User     @relation(fields: [user_id], references: [id],onDelete: Cascade)
+  post_id    String
+  user_id    String 
+  comment    String
+  created_at DateTime @default(now())
+}
+
+model Like {
+  user       User     @relation(fields: [user_id], references: [id],onDelete: Cascade)
+  post       Post     @relation(fields: [post_id], references: [id],onDelete: Cascade)
+  user_id    String   @id @unique
+  post_id    String
+  created_at DateTime @default(now())
+}
+
+model Category {
+  id         String   @id @default(uuid())
+  slug       String   @unique
+  created_at DateTime @default(now())
+}
+
+
+model PostAssets{
+  post Post @relation(fields: [id],references: [id],onDelete: Cascade)
+  id String @id @unique
+  width Int
+  height Int
+  url String
+}
