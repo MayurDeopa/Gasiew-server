@@ -4,12 +4,12 @@ import jwt from 'jsonwebtoken'
 import cookie, { serialize } from 'cookie'
 
 import { Request,Response } from 'express'
-import { PrismaClient} from '@prisma/client'
+
 
 import { authUtil } from '../../lib'
-import { initialiseUserAssets } from '../../lib/user'
+import { initialiseUserAssets, initialiseUserBanner } from '../../lib/user'
+import { prisma } from '../../lib/prisma'
 
-const prisma = new PrismaClient()
 
 export const login = asyncHandler(async(req:Request,res:Response)=>{
     
@@ -35,15 +35,6 @@ export const login = asyncHandler(async(req:Request,res:Response)=>{
             username:userExist.username,
             id:userExist.id
         })
-        const serialised = cookie.serialize("Auth", token, {
-            httpOnly: true,
-            secure: process.env.NODE_ENV !== "development",
-            sameSite: "strict",
-            maxAge: 60 * 60 * 24 * 30,
-            path: "/",
-          });
-
-          res.setHeader('Set-Cookie',serialised)
 
           res.status(200).json({
             message:"Login successful",
@@ -92,6 +83,9 @@ export const register = asyncHandler(async(req:Request,res:Response)=>{
                 username:username,
                 assets:{
                     create:initialiseUserAssets()
+                },
+                banner:{
+                    create:initialiseUserBanner()
                 }
             }
         })
@@ -112,14 +106,6 @@ export const bootstrapUser =asyncHandler(async(req,res)=>{
     const {currentUserId} = req
 
     if(!currentUserId){
-       let invalidCookie = serialize("Auth", '', {
-        httpOnly: true,
-        secure: process.env.NODE_ENV !== "development",
-        sameSite: "strict",
-        maxAge: -1,
-        path: "/",
-      })
-      res.setHeader("Set-Cookie",invalidCookie)
       res.status(501).json({
         message:"Invalid token",
         success:false
@@ -127,7 +113,6 @@ export const bootstrapUser =asyncHandler(async(req,res)=>{
       return;
     }
     
-    let prisma= new PrismaClient()
     
     let id:any = currentUserId
     
@@ -138,14 +123,6 @@ export const bootstrapUser =asyncHandler(async(req,res)=>{
     })
 
     if(!user){
-        let invalidCookie = serialize("Auth", '', {
-            httpOnly: true,
-            secure: process.env.NODE_ENV !== "development",
-            sameSite: "strict",
-            maxAge: -1,
-            path: "/",
-          })
-          res.setHeader("Set-Cookie",invalidCookie)
           res.status(501).json({
             message:"No user found",
             success:false

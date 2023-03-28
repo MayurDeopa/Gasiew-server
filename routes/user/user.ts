@@ -11,5 +11,9 @@ const router = express.Router()
 
 router.get('/:username',userController.getUser)
 
+router.get('/account/id',authMiddleware,userController.getUserById)
+
+router.post('/account/update/avatar',authMiddleware,userController.updateProfilePicture)
+
 
 export default router;

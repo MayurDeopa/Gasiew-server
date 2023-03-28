@@ -7,13 +7,7 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
-model UserAssets {
-  user       User   @relation(fields: [id], references: [id],onDelete: Cascade)
-  id         String @id @unique
-  height     Int @default(496)
-  width      Int @default(728)
-  avatar_url String @default("https://ik.imagekit.io/artboomer/pawstagram/imgbin-photography-cat-paris-cat-HvR60Gek0CaHsRM1qMh3vHAwM.jpg?updatedAt=1679255451128")
-}
+
 
 model User {
   id                   String      @id @default(uuid())
@@ -28,6 +22,7 @@ model User {
   post                 Post[]
   comment              Comment[]
   likes                Like[]
+  banner               UserBanner?
   created_at           DateTime    @default(now())
 }
 
@@ -69,6 +64,14 @@ model Category {
   created_at DateTime @default(now())
 }
 
+model UserAssets {
+  user       User   @relation(fields: [id], references: [id],onDelete: Cascade)
+  id         String @id @unique
+  height     Int 
+  width      Int 
+  fileId     String
+  avatar_url String 
+}
 
 model PostAssets{
   post Post @relation(fields: [id],references: [id],onDelete: Cascade)
@@ -76,4 +79,14 @@ model PostAssets{
   width Int
   height Int
   url String
+  fileId String @default("gas")
+}
+
+model UserBanner{
+  user       User   @relation(fields: [id], references: [id],onDelete: Cascade)
+  id         String @id @unique
+  height     Int 
+  width      Int 
+  fileId     String
+  url        String
 }

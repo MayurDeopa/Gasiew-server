@@ -1,14 +1,11 @@
 
 
 import asyncHandler from 'express-async-handler'
-import brcypt from 'bcrypt'
 
 import { Request,Response } from 'express'
-import {PrismaClient} from '@prisma/client'
 
-import { authUtil } from '../../lib'
-
-const prisma  =new PrismaClient()
+import { prisma } from '../../lib/prisma'
+import { imagekit } from '../../lib/imagekit'
 
 
 
@@ -25,6 +22,7 @@ export const getUser = asyncHandler(async(req:Request,res:Response)=>{
             role:true,
             is_public:true,
             assets:true,
+            banner:true,
             post:{
                 include:{
                     assets:{
@@ -65,27 +63,83 @@ export const getUser = asyncHandler(async(req:Request,res:Response)=>{
 export const updateProfilePicture = asyncHandler(async(req:Request,res:Response)=>{
 
     const userId = req.currentUserId
-    const {image} = req.body
+    const {newImage,oldImageId} = req.body
+
+    
+
     const updateImage = await prisma.userAssets.update({
         where:{
             id:userId
         },
         data:{
-            avatar_url:image.url,
-            height:image.height,
-            width:image.width
+            avatar_url:newImage!.url,
+            height:newImage!.height,
+            width:newImage!.width,
+            fileId:newImage!.fileId
         }
     })
+
+    if(oldImageId!=process.env.DEFAULT_AVATAR_FILE_ID){
+        await imagekit.deleteFile(oldImageId)
+    }
     
 
-    if(updateImage){
+
         res.status(201).send({
             success:true,
             data:updateImage
         })
+
+
+
+})
+
+export const getUserById = asyncHandler(async(req:Request,res:Response)=>{
+
+    let id = req.currentUserId
+    const user = await prisma.user.findFirst({
+        where:{
+            id:id
+        },
+        select:{
+            id:true,
+            username:true,
+            role:true,
+            is_public:true,
+            assets:true,
+            banner:true,
+            post:{
+                include:{
+                    assets:{
+                        select:{
+                            url:true,
+                            height:true,
+                            width:true
+                        }
+                    },
+                    comments:true,
+                    likes:true,
+                    user:{
+                        select:{
+                            id:true,
+                            username:true,
+                            assets:true
+                        }
+                    }
+                }
+            }
+        }
+    })
+    
+
+    if(user){
+        res.status(201).send({
+            success:true,
+            data:user
+        })
     }
     else{
-        throw Error("Invalid username")
+        throw Error("Invalid id")
     }
 
 

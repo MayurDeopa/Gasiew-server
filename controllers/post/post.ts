@@ -4,11 +4,9 @@ import asyncHandler from 'express-async-handler'
 import brcypt from 'bcrypt'
 
 import { Request,Response } from 'express'
-import {PrismaClient} from '@prisma/client'
 
-import { authUtil } from '../../lib'
+import { prisma } from '../../lib/prisma'
 
-const prisma  =new PrismaClient()
 
 export const createPost = asyncHandler(async(req:Request,res:Response)=>{
     
@@ -27,7 +25,8 @@ export const createPost = asyncHandler(async(req:Request,res:Response)=>{
                 create:{
                     url:image.url,
                     height:image.height,
-                    width:image.width
+                    width:image.width,
+                    fileId:image.fileId
                 }
             }
         }
