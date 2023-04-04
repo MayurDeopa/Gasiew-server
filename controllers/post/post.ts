@@ -38,10 +38,7 @@ export const createPost = asyncHandler(async(req:Request,res:Response)=>{
 
 export const getPosts = asyncHandler(async(req:Request,res:Response)=>{
 
-    let {sortBy} = req.query
-    if(!sortBy){
-        sortBy = 'new'
-    }
+    
     const posts = await prisma.post.findMany({
         include:{
             assets:{
