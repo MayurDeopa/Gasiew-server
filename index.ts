@@ -1,17 +1,15 @@
 import express from 'express'
 import cors from 'cors'
 import cookieParser from 'cookie-parser'
-import { PrismaClient } from '@prisma/client'
-import authMiddleware from './middlewares/auth'
 import { errorHandler ,notFound} from './middlewares/errorHandler'
 import {authRouter,imagekitRouter,postRouter, userRouter} from './routes'
 
 
 const app = express()
-const prisma = new PrismaClient()
 
+
+app.use(cors())
 app.use(cookieParser())
-app.use(cors({origin:'*'}))
 app.use(express.json())
 
 
