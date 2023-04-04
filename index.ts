@@ -8,7 +8,9 @@ import {authRouter,imagekitRouter,postRouter, userRouter} from './routes'
 const app = express()
 
 
-app.use(cors())
+app.use(cors({
+  origin:"*"
+}))
 app.use(cookieParser())
 app.use(express.json())
 
