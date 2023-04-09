@@ -5,7 +5,7 @@ import asyncHandler from 'express-async-handler'
 import { Request,Response } from 'express'
 
 import { prisma } from '../../lib/prisma'
-import { imagekit } from '../../lib/imagekit'
+import { deleteImageFromImagekit, imagekit, uploadImageToImagekit } from '../../lib/imagekit'
 
 
 
@@ -63,27 +63,24 @@ export const getUser = asyncHandler(async(req:Request,res:Response)=>{
 export const updateProfilePicture = asyncHandler(async(req:Request,res:Response)=>{
 
     const userId = req.currentUserId
-    const {newImage,oldImageId} = req.body
+    const {image,id} = req.body
 
-    
+    await deleteImageFromImagekit(id)
+
+    const {fileId,url,height,width} = await uploadImageToImagekit(image.image,image.name)
 
     const updateImage = await prisma.userAssets.update({
         where:{
             id:userId
         },
         data:{
-            avatar_url:newImage!.url,
-            height:newImage!.height,
-            width:newImage!.width,
-            fileId:newImage!.fileId
+            avatar_url:url,
+            height:height,
+            width:width,
+            fileId:fileId
         }
     })
-
-    if(oldImageId!=process.env.DEFAULT_AVATAR_FILE_ID){
-        await imagekit.deleteFile(oldImageId)
-    }
     
-
 
         res.status(201).send({
             success:true,

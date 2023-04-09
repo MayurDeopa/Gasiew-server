@@ -1,3 +1,5 @@
+import fs from 'fs'
+
 
 import {Request,Response,NextFunction} from 'express'
 
@@ -18,6 +20,11 @@ export const userError =(err:boolean,msg:String ,req:Request, res:Response, next
 
 
   export const errorHandler = (err:any, req:Request, res:Response, next:NextFunction) => {
+
+    fs.appendFile('error.txt',JSON.stringify(err),()=>{
+      console.log(err)
+    })
+
     return res.status(400).json({
       error:err.message,
       success:false

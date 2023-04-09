@@ -6,15 +6,19 @@ import brcypt from 'bcrypt'
 import { Request,Response } from 'express'
 
 import { prisma } from '../../lib/prisma'
+import { uploadImageToImagekit } from '../../lib/imagekit'
 
 
 export const createPost = asyncHandler(async(req:Request,res:Response)=>{
-    
-    const {post,image} = req.body
     const id = req.currentUserId!
-    if( !post || !image ||!id){
+
+    const {post,image} = req.body
+    if( !post || !image ){
         throw Error('Fields are missing')
     }
+    const {url,height,width,fileId} = await uploadImageToImagekit(image.image,image.name)
+    
+    
 
     const createPost = await prisma.post.create({
         data:{
@@ -23,10 +27,10 @@ export const createPost = asyncHandler(async(req:Request,res:Response)=>{
             caption:post.caption,
             assets:{
                 create:{
-                    url:image.url,
-                    height:image.height,
-                    width:image.width,
-                    fileId:image.fileId
+                    url:url,
+                    height:height,
+                    width:width,
+                    fileId:fileId
                 }
             }
         }
@@ -143,6 +147,38 @@ export const postComment = asyncHandler(async(req:Request,res:Response)=>{
         res.status(200).send({
             success:true,
             data:createComment
+        })
+    }
+    else{
+        throw Error("Failed to post the comment")
+    }
+
+
+})
+
+
+export const editPost = asyncHandler(async(req:Request,res:Response)=>{
+
+    const userId = req.currentUserId
+    const {postId} = req.params
+
+    const {title,caption,assets} = req.body
+
+    const updatedPost = await prisma.post.update({
+        where:{
+            id:postId
+        },
+        data:{
+            title:title,
+            caption:caption,
+            assets:assets
+        }
+    })
+
+    if(updatedPost){
+        res.status(200).send({
+            success:true,
+            data:updatedPost
         })
     }
     else{
