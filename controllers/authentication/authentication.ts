@@ -138,7 +138,7 @@ export const bootstrapUser =asyncHandler(async(req,res)=>{
     })
 
     if(!user){
-          res.status(501).json({
+          res.status(401).json({
             message:"No user found",
             success:false
           })
