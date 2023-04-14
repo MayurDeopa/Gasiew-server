@@ -29,22 +29,31 @@ export const login = asyncHandler(async(req:Request,res:Response)=>{
     }
     let isPasswordMatched = await brcypt.compare(password,userExist.password)
     if(isPasswordMatched){
+
+        const userData = await prisma.user.findFirst({
+            where:{
+                id:userExist.id
+            },
+            select:{
+                username:true,
+                email:true,
+                id:true,
+                assets:true
+            }
+        })
+
         let token = authUtil.generateToken({
             exp:Math.floor(Date.now() / 1000) + 60 * 60 * 24 * 30,
-            email:userExist.email,
-            username:userExist.username,
-            id:userExist.id
+            email:userData!.email,
+            username:userData!.username,
+            id:userData!.id
         })
 
           res.status(200).json({
             message:"Login successful",
             token:token,
             success:true,
-            data:{
-                username:userExist.username,
-                id:userExist.id,
-                email:userExist.email
-            }
+            data:userData
           })
         
     }
@@ -119,6 +128,12 @@ export const bootstrapUser =asyncHandler(async(req,res)=>{
     const user = await prisma.user.findFirst({
         where:{
             id:id
+        },
+        select:{
+            username:true,
+            email:true,
+            id:true,
+            assets:true
         }
     })
 
@@ -141,11 +156,7 @@ export const bootstrapUser =asyncHandler(async(req,res)=>{
         message:'Login successful',
         token:token,
         success:true,
-        data:{
-            username:user!.username,
-            id:user!.id,
-            email:user!.email
-        }
+        data:user
       })
 })
 
