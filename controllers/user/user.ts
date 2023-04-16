@@ -65,7 +65,7 @@ export const updateProfilePicture = asyncHandler(async(req:Request,res:Response)
     const userId = req.currentUserId
     const {image,id} = req.body
 
-    if(process.env.DEFAULT_AVATAR_FILE_ID!=id){
+    if(process.env.DEFAULT_AVATAR_FILE_ID!==id){
         await deleteImageFromImagekit(id)
     }
 
