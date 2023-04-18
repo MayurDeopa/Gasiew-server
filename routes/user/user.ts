@@ -15,5 +15,7 @@ router.get('/account/id',authMiddleware,userController.getUserById)
 
 router.post('/account/update/avatar',authMiddleware,userController.updateProfilePicture)
 
+router.post('/account/update/banner',authMiddleware,userController.updateBanner)
+
 
 export default router;

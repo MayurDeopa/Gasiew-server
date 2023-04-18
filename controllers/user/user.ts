@@ -93,6 +93,39 @@ export const updateProfilePicture = asyncHandler(async(req:Request,res:Response)
 
 })
 
+export const updateBanner = asyncHandler(async(req:Request,res:Response)=>{
+
+    const userId = req.currentUserId
+    const {image,id} = req.body
+
+    if(process.env.DEFAULT_BANNER_FILE_ID!==id){
+        await deleteImageFromImagekit(id)
+    }
+
+    const {fileId,url,height,width} = await uploadImageToImagekit(image.image,image.name)
+
+    const updateImage = await prisma.userBanner.update({
+        where:{
+            id:userId
+        },
+        data:{
+            url:url,
+            height:height,
+            width:width,
+            fileId:fileId
+        }
+    })
+    
+
+        res.status(201).send({
+            success:true,
+            data:updateImage
+        })
+
+
+
+})
+
 export const getUserById = asyncHandler(async(req:Request,res:Response)=>{
 
     let id = req.currentUserId
